@@ -1,6 +1,6 @@
 CC = gcc
 RM = -rm -f
-# INCLUDE = -I ../units
+# INCLUDES = -I../units
 BUILDDIR = ../build
 OUTDIR = ../output
 TARGET = $(OUTDIR)/server
@@ -11,7 +11,8 @@ object = $(patsubst %.c, $(BUILDDIR)/%.o, $(source))
 all: $(TARGET)
 
 $(BUILDDIR)/%.o: %.c
-	$(CC) -c $<  $(INCLUDE)  -o $@
+	# $(CC) -c $(INCLUDES) $< -o $@  
+	$(CC) -c $< -o $@
 
 $(TARGET): $(object)
 	$(CC) -Wall -g -o $@ $(object)

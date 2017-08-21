@@ -13,6 +13,8 @@ extern "C" {
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/wait.h>
 // #include "env.h"
 
 
@@ -21,6 +23,10 @@ extern "C" {
 
 /**------------server env------------*/
 #define SERV_PORT   9877
+
+typedef void Sigfunc(int);
+Sigfunc *wrap_signal(int signo, Sigfunc *func);
+void sig_chld(int signo);
 
 void str_echo(int sockfd);
 int go_server_ipv4();
