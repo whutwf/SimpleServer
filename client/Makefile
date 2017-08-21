@@ -3,7 +3,7 @@ RM = -rm -f
 # INCLUDE = -I ../units
 BUILDDIR = ../build
 OUTDIR = ../output
-TARGET = $(OUTDIR)/server
+TARGET = $(OUTDIR)/client
 
 source = $(wildcard *.c)
 object = $(patsubst %.c, $(BUILDDIR)/%.o, $(source))
@@ -22,4 +22,4 @@ clean:
 install:
 	sudo cp $(TARGET) /usr/local/bin
 uninstall:
-	sudo rm /usr/local/bin/server
+	sudo rm /usr/local/bin/client

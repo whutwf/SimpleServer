@@ -13,7 +13,14 @@ extern "C" {
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include "env.h"
+// #include "env.h"
+
+
+#define LISTENQ     1024
+#define MAXLINE     4096
+
+/**------------server env------------*/
+#define SERV_PORT   9877
 
 void str_echo(int sockfd);
 int go_server_ipv4();

@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv)
 {
-
+    go_server_ipv4(SERV_PORT);
 }
 
 void str_echo(int sockfd)
@@ -40,15 +40,18 @@ int go_server_ipv4(int port)
 
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htons(INADDR_ANY);
-    servaddr.sin_port = port;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    /* Connection refused reason*/
+    servaddr.sin_port = htons(port);
 
     if (bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
         perror("[server] Error: socket bind\n");
+        close(listenfd);
         return -1;
     }
     if (listen(listenfd, LISTENQ) < 0) {
         perror("[server] Error: socket listen\n");
+        close(listenfd);
         return -1;
     }
 
@@ -56,7 +59,8 @@ int go_server_ipv4(int port)
         clilen = sizeof(cliaddr);
         connfd = accept(listenfd, (struct sockaddr*)&cliaddr, &clilen);
         if (connfd < 0) {
-            perror("[server] Error: socket connect\n");
+            perror("[server] Error: socket accept\n");
+            close(listenfd);
             return -1;
         }
 
