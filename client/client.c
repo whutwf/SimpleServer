@@ -10,17 +10,55 @@ int main(int argc, char **argv)
 
 void str_cli(int sockfd, FILE *fp)
 {
+    int maxfdp1;
+    fd_set rset;
+    int filefd = -1;
+
     char sendline[MAXLINE], recvline[MAXLINE];
-    while(fgets(sendline, MAXLINE, fp) != NULL) {
 
-        if (write(sockfd, sendline, strlen(sendline)) < 0 ) {
-            perror("[client] Error: write sockfd\n");
+    int n;
+    int stdineof = 0;
+
+    FD_ZERO(&rset);
+    filefd =fileno(fp);
+    for ( ; ; ) {
+        if (stdineof == 0) {
+             FD_SET(filefd, &rset);
         }
-        if (read(sockfd, recvline, MAXLINE) == 0) {
-            perror("[client] Error；server terminated prematurely\n");
+        FD_SET(sockfd, &rset);
+        maxfdp1 = ((filefd > sockfd) ? filefd : sockfd) + 1;
+        if (select(maxfdp1, &rset, NULL, NULL, NULL) <= 0) {
+            perror("[client] Error: select\n");
+            return;
         }
 
-        fputs(recvline, stdout);
+        /*使用select实现I/O复用， 阻塞在某一个上面*/
+        /*shutdown可以单独关闭读与写，双工道*/
+        if (FD_ISSET(sockfd, &rset)) {
+            if ((n = read(sockfd, recvline, MAXLINE)) == 0) {
+                if (stdineof == 1) {
+                    return;
+                } else {
+                    perror("[client] Error；server terminated prematurely\n");
+                } 
+            }
+
+            write(filefd, recvline, n);
+
+        } else if (FD_ISSET(filefd, &rset)) {
+
+            if ((n = read(filefd, sendline, MAXLINE)) == 0) {
+                stdineof = 1;
+                shutdown(sockfd, SHUT_WR);
+                FD_CLR(filefd, &rset);
+                continue;
+            }
+
+            if (write(sockfd, sendline, n) < 0 ) {
+                perror("[client] Error: write sockfd\n");
+            }
+
+        }
     }
 }
 
